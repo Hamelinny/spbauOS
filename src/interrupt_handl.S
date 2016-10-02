@@ -1,0 +1,559 @@
+.code64 
+.extern interrupt_handler
+
+.macro handl N 
+handl\N:
+
+    pushq %rax 
+    pushq %rbx 
+    pushq %rcx 
+    pushq %rdx 
+    pushq %rsi 
+    pushq %rdi 
+    pushq %rbp 
+    pushq %r8  
+    pushq %r9 
+    pushq %r10
+    pushq %r11
+    pushq %r12
+    pushq %r13 
+    pushq %r14
+    pushq %r15
+    movq $\N, %rdi
+    cld
+    call interrupt_handler
+
+    popq %r15
+    popq %r14
+    popq %r13
+    popq %r12
+    popq %r11
+    popq %r10
+    popq %r9 
+    popq %r8  
+    popq %rbp 
+    popq %rdi 
+    popq %rsi 
+    popq %rdx 
+    popq %rcx 
+    popq %rbx 
+    popq %rax 
+    iretq
+.endm
+
+
+handl 0
+handl 1
+handl 2
+handl 3
+handl 4
+handl 5
+handl 6
+handl 7
+handl 8
+handl 9
+handl 10
+handl 11
+handl 12
+handl 13
+handl 14
+handl 15
+handl 16
+handl 17
+handl 18
+handl 19
+handl 20
+handl 21
+handl 22
+handl 23
+handl 24
+handl 25
+handl 26
+handl 27
+handl 28
+handl 29
+handl 30
+handl 31
+handl 32
+handl 33
+handl 34
+handl 35
+handl 36
+handl 37
+handl 38
+handl 39
+handl 40
+handl 41
+handl 42
+handl 43
+handl 44
+handl 45
+handl 46
+handl 47
+handl 48
+handl 49
+handl 50
+handl 51
+handl 52
+handl 53
+handl 54
+handl 55
+handl 56
+handl 57
+handl 58
+handl 59
+handl 60
+handl 61
+handl 62
+handl 63
+handl 64
+handl 65
+handl 66
+handl 67
+handl 68
+handl 69
+handl 70
+handl 71
+handl 72
+handl 73
+handl 74
+handl 75
+handl 76
+handl 77
+handl 78
+handl 79
+handl 80
+handl 81
+handl 82
+handl 83
+handl 84
+handl 85
+handl 86
+handl 87
+handl 88
+handl 89
+handl 90
+handl 91
+handl 92
+handl 93
+handl 94
+handl 95
+handl 96
+handl 97
+handl 98
+handl 99
+handl 100
+handl 101
+handl 102
+handl 103
+handl 104
+handl 105
+handl 106
+handl 107
+handl 108
+handl 109
+handl 110
+handl 111
+handl 112
+handl 113
+handl 114
+handl 115
+handl 116
+handl 117
+handl 118
+handl 119
+handl 120
+handl 121
+handl 122
+handl 123
+handl 124
+handl 125
+handl 126
+handl 127
+handl 128
+handl 129
+handl 130
+handl 131
+handl 132
+handl 133
+handl 134
+handl 135
+handl 136
+handl 137
+handl 138
+handl 139
+handl 140
+handl 141
+handl 142
+handl 143
+handl 144
+handl 145
+handl 146
+handl 147
+handl 148
+handl 149
+handl 150
+handl 151
+handl 152
+handl 153
+handl 154
+handl 155
+handl 156
+handl 157
+handl 158
+handl 159
+handl 160
+handl 161
+handl 162
+handl 163
+handl 164
+handl 165
+handl 166
+handl 167
+handl 168
+handl 169
+handl 170
+handl 171
+handl 172
+handl 173
+handl 174
+handl 175
+handl 176
+handl 177
+handl 178
+handl 179
+handl 180
+handl 181
+handl 182
+handl 183
+handl 184
+handl 185
+handl 186
+handl 187
+handl 188
+handl 189
+handl 190
+handl 191
+handl 192
+handl 193
+handl 194
+handl 195
+handl 196
+handl 197
+handl 198
+handl 199
+handl 200
+handl 201
+handl 202
+handl 203
+handl 204
+handl 205
+handl 206
+handl 207
+handl 208
+handl 209
+handl 210
+handl 211
+handl 212
+handl 213
+handl 214
+handl 215
+handl 216
+handl 217
+handl 218
+handl 219
+handl 220
+handl 221
+handl 222
+handl 223
+handl 224
+handl 225
+handl 226
+handl 227
+handl 228
+handl 229
+handl 230
+handl 231
+handl 232
+handl 233
+handl 234
+handl 235
+handl 236
+handl 237
+handl 238
+handl 239
+handl 240
+handl 241
+handl 242
+handl 243
+handl 244
+handl 245
+handl 246
+handl 247
+handl 248
+handl 249
+handl 250
+handl 251
+handl 252
+handl 253
+handl 254
+handl 255
+
+.global handler
+handler:
+    .quad handl0
+    .quad handl1 
+    .quad handl2
+    .quad handl3
+    .quad handl4
+    .quad handl5
+    .quad handl6
+    .quad handl7
+    .quad handl8
+    .quad handl9
+    .quad handl10
+    .quad handl11
+    .quad handl12
+    .quad handl13
+    .quad handl14
+    .quad handl15
+    .quad handl16
+    .quad handl17
+    .quad handl18
+    .quad handl19
+    .quad handl20
+    .quad handl21
+    .quad handl22
+    .quad handl23
+    .quad handl24
+    .quad handl25
+    .quad handl26
+    .quad handl27
+    .quad handl28
+    .quad handl29
+    .quad handl30
+    .quad handl31 
+    .quad handl32
+    .quad handl33
+    .quad handl34
+    .quad handl35
+    .quad handl36
+    .quad handl37
+    .quad handl38
+    .quad handl39
+    .quad handl40
+    .quad handl41 
+    .quad handl42
+    .quad handl43
+    .quad handl44
+    .quad handl45
+    .quad handl46
+    .quad handl47
+    .quad handl48
+    .quad handl49
+    .quad handl50
+    .quad handl51 
+    .quad handl52
+    .quad handl53
+    .quad handl54
+    .quad handl55
+    .quad handl56
+    .quad handl57
+    .quad handl58
+    .quad handl59
+    .quad handl60
+    .quad handl61 
+    .quad handl62
+    .quad handl63
+    .quad handl64
+    .quad handl65
+    .quad handl66
+    .quad handl67
+    .quad handl68
+    .quad handl69
+    .quad handl70
+    .quad handl71 
+    .quad handl72
+    .quad handl73
+    .quad handl74
+    .quad handl75
+    .quad handl76
+    .quad handl77
+    .quad handl78
+    .quad handl79
+    .quad handl80
+    .quad handl81 
+    .quad handl82
+    .quad handl83
+    .quad handl84
+    .quad handl85
+    .quad handl86
+    .quad handl87
+    .quad handl88
+    .quad handl89
+    .quad handl90
+    .quad handl91 
+    .quad handl92
+    .quad handl93
+    .quad handl94
+    .quad handl95
+    .quad handl96
+    .quad handl97
+    .quad handl98
+    .quad handl99
+    .quad handl100
+    .quad handl101 
+    .quad handl102
+    .quad handl103
+    .quad handl104
+    .quad handl105
+    .quad handl106
+    .quad handl107
+    .quad handl108
+    .quad handl109
+    .quad handl110
+    .quad handl111
+    .quad handl112
+    .quad handl113
+    .quad handl114
+    .quad handl115
+    .quad handl116
+    .quad handl117
+    .quad handl118
+    .quad handl119
+    .quad handl120
+    .quad handl121
+    .quad handl122
+    .quad handl123
+    .quad handl124
+    .quad handl125
+    .quad handl126
+    .quad handl127
+    .quad handl128
+    .quad handl129
+    .quad handl130
+    .quad handl131 
+    .quad handl132
+    .quad handl133
+    .quad handl134
+    .quad handl135
+    .quad handl136
+    .quad handl137
+    .quad handl138
+    .quad handl139
+    .quad handl140
+    .quad handl141 
+    .quad handl142
+    .quad handl143
+    .quad handl144
+    .quad handl145
+    .quad handl146
+    .quad handl147
+    .quad handl148
+    .quad handl149
+    .quad handl150
+    .quad handl151 
+    .quad handl152
+    .quad handl153
+    .quad handl154
+    .quad handl155
+    .quad handl156
+    .quad handl157
+    .quad handl158
+    .quad handl159
+    .quad handl160
+    .quad handl161 
+    .quad handl162
+    .quad handl163
+    .quad handl164
+    .quad handl165
+    .quad handl166
+    .quad handl167
+    .quad handl168
+    .quad handl169
+    .quad handl170
+    .quad handl171 
+    .quad handl172
+    .quad handl173
+    .quad handl174
+    .quad handl175
+    .quad handl176
+    .quad handl177
+    .quad handl178
+    .quad handl179
+    .quad handl180
+    .quad handl181 
+    .quad handl182
+    .quad handl183
+    .quad handl184
+    .quad handl185
+    .quad handl186
+    .quad handl187
+    .quad handl188
+    .quad handl189
+    .quad handl190
+    .quad handl191 
+    .quad handl192
+    .quad handl193
+    .quad handl194
+    .quad handl195
+    .quad handl196
+    .quad handl197
+    .quad handl198
+    .quad handl199
+    .quad handl200
+    .quad handl201 
+    .quad handl202
+    .quad handl203
+    .quad handl204
+    .quad handl205
+    .quad handl206
+    .quad handl207
+    .quad handl208
+    .quad handl209
+    .quad handl210
+    .quad handl211
+    .quad handl212
+    .quad handl213
+    .quad handl214
+    .quad handl215
+    .quad handl216
+    .quad handl217
+    .quad handl218
+    .quad handl219
+    .quad handl220
+    .quad handl221
+    .quad handl222
+    .quad handl223
+    .quad handl224
+    .quad handl225
+    .quad handl226
+    .quad handl227
+    .quad handl228
+    .quad handl229
+    .quad handl230
+    .quad handl231 
+    .quad handl232
+    .quad handl233
+    .quad handl234
+    .quad handl235
+    .quad handl236
+    .quad handl237
+    .quad handl238
+    .quad handl239
+    .quad handl240
+    .quad handl241 
+    .quad handl242
+    .quad handl243
+    .quad handl244
+    .quad handl245
+    .quad handl246
+    .quad handl247
+    .quad handl248
+    .quad handl249
+    .quad handl250
+    .quad handl251 
+    .quad handl252
+    .quad handl253
+    .quad handl254
+    .quad handl255
