@@ -1,9 +1,8 @@
 .code64 
 .extern interrupt_handler
 
-.macro handl N 
-handl\N:
 
+.macro pushreg
     pushq %rax 
     pushq %rbx 
     pushq %rcx 
@@ -19,10 +18,9 @@ handl\N:
     pushq %r13 
     pushq %r14
     pushq %r15
-    movq $\N, %rdi
-    cld
-    call interrupt_handler
+.endm
 
+.macro popreg
     popq %r15
     popq %r14
     popq %r13
@@ -37,7 +35,29 @@ handl\N:
     popq %rdx 
     popq %rcx 
     popq %rbx 
-    popq %rax 
+    popq %rax
+.endm
+    
+
+.macro handl N 
+handl\N:
+    pushreg
+    movq $\N, %rdi    
+    cld
+    call interrupt_handler
+    popreg
+    iretq
+.endm
+
+
+.macro handlErr N
+handl\N:
+    pushreg
+    movq $\N, %rdi
+    cld
+    call interrupt_handler
+    popreg
+    addq $8, %rsp
     iretq
 .endm
 
@@ -50,16 +70,16 @@ handl 4
 handl 5
 handl 6
 handl 7
-handl 8
+handlErr 8
 handl 9
-handl 10
-handl 11
-handl 12
-handl 13
-handl 14
+handlErr 10
+handlErr 11
+handlErr 12
+handlErr 13
+handlErr 14
 handl 15
 handl 16
-handl 17
+handlErr 17
 handl 18
 handl 19
 handl 20
