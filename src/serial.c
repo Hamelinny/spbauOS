@@ -1,9 +1,8 @@
 #include <stdint.h>
-#include <serial.h>
 #include <ioport.h>
 #include <bits.h>
+#include <serial.h>
 
-const int serial_port = 0x3f8;
 
 void print_string(const char *s) {
     int i = 0;
