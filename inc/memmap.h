@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 struct memory_map {
-	uint32_t size;
-	uint64_t base;
-	uint64_t len;
-	uint32_t type;
+    uint32_t size;
+    uint64_t base;
+    uint64_t len;
+    uint32_t type;
 } __attribute__((packed));
 
 
