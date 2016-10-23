@@ -14,6 +14,8 @@ static void qemu_gdb_hang(void)
 #include <timer.h>
 #include <ioport.h>
 #include <io.h>
+#include <memmap.h>
+#include <buddy.h>
 
 extern uint64_t handler[];
 
@@ -32,19 +34,29 @@ void main(void)
 
         enable_ints();
 	
-	__asm__("int $40");
+	//__asm__("int $40");
 
-	printf("%d\n", 10);
-	printf("%ho\n", 8);
-	printf("%hhx\n", 16);
-	printf("%x\n", 255);
-	char a[10];
-	char * x = a;
-	printf("%s\n", "hello");
-	printf("%d\n", snprintf(x, 10, "%s", "hello"));
-	printf("%s\n", a);
-	printf("%lld\n", (1ll << 62));
-	
+	disable_ints();
+
+	get_memmap();
+	print_memmap();
+	/*uint64_t mem = buddy_alloc(0);
+	printf("%x\n", mem);
+	buddy_free(mem);
+	mem = buddy_alloc(1);
+	printf("%x\n", mem);
+	buddy_free(mem);
+	mem = buddy_alloc(2);
+	printf("%x\n", mem);
+	buddy_free(mem);
+	uint64_t mem1 = buddy_alloc(0);
+	printf("%x\n", mem1);
+	uint64_t mem2 = buddy_alloc(0);
+	printf("%x\n", mem2);
+	uint64_t mem3 = buddy_alloc(0);
+	printf("%x\n", mem3);
+	buddy_free(mem1);
+	buddy_free(mem2);
+	buddy_free(mem3);*/
 	while (1);
-	out8(0x21, (1 << 8) - 1);
 }
