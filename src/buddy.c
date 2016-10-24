@@ -4,6 +4,7 @@
 #include <memory.h>
 
 #define SIZE 25
+#define SHIFT 0xffff800000000000
 
 static struct buddy * ch;
 
@@ -20,7 +21,7 @@ void add_buddy(int level, int num) {
 }
 
 uint64_t delete_buddy(int level) {
-    uint64_t ans = lists[level]->addr;
+    uint64_t ans = (lists[level] - ch) * PAGE;
     lists[level] = lists[level]->next;
     return ans;
 }
@@ -39,8 +40,8 @@ void buddy_init(struct memory_map table[], size_t ptr) {
     uint32_t memory_to_use = maxpages * sizeof(struct buddy);
     for (size_t i = 0; i < ptr; i++) {
         if (table[i].type == 1) {
-            if (table[i].len >= memory_to_use) {
-                ch = (struct buddy * )table[i].base;
+            if (table[i].len >= memory_to_use && table[i].base + table[i].len < (((uint64_t)1) << 32)) {
+                ch = (struct buddy * )(table[i].base + SHIFT);
                 printf("%x-%x %s\n", table[i].base, table[i].base + memory_to_use - 1, "for buddy allocator");
                 table[i].base += memory_to_use;
                 table[i].len -= memory_to_use;
@@ -65,7 +66,6 @@ void buddy_init(struct memory_map table[], size_t ptr) {
             int num = (pointer + shift) / PAGE;
             ch[num].lvl = 0; 
             ch[num].free = 1;
-            ch[num].addr = pointer + shift;
             ch[num].next = nil;
             ch[num].usage = 1;
             shift += PAGE;
@@ -117,7 +117,7 @@ void prepare(int level) {
 
 uint64_t buddy_alloc(int level) {
     prepare(level);
-    return delete_buddy(level);
+    return delete_buddy(level) + SHIFT;
 }
 
 void merge(size_t num) {
@@ -136,7 +136,7 @@ void merge(size_t num) {
 }
 
 void buddy_free(uint64_t addr) {
-    size_t num = addr / PAGE;
+    size_t num = (addr - SHIFT) / PAGE;
     ch[num].free = 1;
     merge(num);
 }
