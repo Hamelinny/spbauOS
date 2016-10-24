@@ -8,7 +8,6 @@
 struct buddy {
     uint8_t lvl;
     char free;
-    uint64_t addr;
     struct buddy * next;
     char usage;
 
