@@ -8,6 +8,10 @@
 struct buddy {
     uint8_t lvl;
     char free;
+    uint64_t addr;
+    struct buddy * next;
+    char usage;
+
 };
 
 void buddy_init(struct memory_map table[], size_t ptr);
