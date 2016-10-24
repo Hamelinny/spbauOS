@@ -1,28 +1,57 @@
 #include <buddy.h>
 #include <memmap.h>
 #include <stdint.h>
+#include <memory.h>
 
-#define SIZE 18
+#define SIZE 25
 
-static struct buddy ch[1 << SIZE];
+static struct buddy * ch;
 
-static uint64_t lists[SIZE][1 << SIZE];
+static struct buddy * lists[SIZE];
 
-static uint32_t ptrs[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint32_t maxpages;
 
 #define PAGE 4096
+#define nil ((struct buddy *)1)
 
 void add_buddy(int level, int num) {
-    lists[level][ptrs[level]++] = num;
+    ch[num].next = lists[level];
+    lists[level] = &ch[num];
 }
 
 uint64_t delete_buddy(int level) {
-    return lists[level][--ptrs[level]];
+    uint64_t ans = lists[level]->addr;
+    lists[level] = lists[level]->next;
+    return ans;
 }
  
 void buddy_init(struct memory_map table[], size_t ptr) {
-    for (size_t i = 0; i < (1 << SIZE); i++) {
+
+    maxpages = 0;
+
+    for (size_t i = 0; i < ptr; i++) {
+        if (table[i].type == 1)
+            maxpages = (table[i].base + table[i].len) / PAGE;
+    }
+    maxpages++;
+    for (int i = 0; i < SIZE; i++)
+        lists[i] = nil;
+    uint32_t memory_to_use = maxpages * sizeof(struct buddy);
+    for (size_t i = 0; i < ptr; i++) {
+        if (table[i].type == 1) {
+            if (table[i].len >= memory_to_use) {
+                ch = (struct buddy * )table[i].base;
+                printf("%x-%x %s\n", table[i].base, table[i].base + memory_to_use - 1, "for buddy allocator");
+                table[i].base += memory_to_use;
+                table[i].len -= memory_to_use;
+                break;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < maxpages; i++) {
         ch[i].free = 0;
+        ch[i].usage = 0;
     }
     for (size_t i = 0; i < ptr; i++) {
         if (table[i].type != 1)
@@ -36,13 +65,20 @@ void buddy_init(struct memory_map table[], size_t ptr) {
             int num = (pointer + shift) / PAGE;
             ch[num].lvl = 0; 
             ch[num].free = 1;
+            ch[num].addr = pointer + shift;
+            ch[num].next = nil;
+            ch[num].usage = 1;
             shift += PAGE;
         } 
 
     }
     for (int level = 1; level < SIZE; level++) {
-        for (int i = 0; i < (1 << SIZE); i += (1 << level)) {
-            int bud = i ^ (1 << (level - 1));
+        for (size_t i = 0; i < maxpages; i += (1 << level)) {
+            size_t bud = i ^ (1 << (level - 1));
+            if (bud >= maxpages)
+                continue;
+            if (ch[bud].usage == 0)
+                continue;
             if (ch[i].lvl == level - 1 && ch[bud].lvl == level - 1 && ch[i].free == 1 && ch[bud].free == 1) {
                 ch[i].lvl = level;
                 ch[bud].free = 0;               
@@ -50,8 +86,8 @@ void buddy_init(struct memory_map table[], size_t ptr) {
         }
     }
    
-    for (int i = 0; i < (1 << SIZE); i++) {
-        if (ch[i].free == 1) {
+    for (size_t i = 0; i < maxpages; i++) {
+        if (ch[i].free == 1 && ch[i].usage == 1) {
             add_buddy(ch[i].lvl, i);           
         }
     }
@@ -60,18 +96,20 @@ void buddy_init(struct memory_map table[], size_t ptr) {
 void prepare(int level) {
     if (level + 1 == SIZE)
         return;
-    if (ptrs[level] != 0)
+    if (lists[level] != nil)
         return;
     prepare(level + 1);
-    if (ptrs[level + 1] == 0) {
+    if (lists[level + 1] == nil) {
         printf("Sorry, no memory\n");
         while (1);
     }
-    size_t num = lists[level + 1][--ptrs[level + 1]];
+    size_t num = delete_buddy(level + 1) / PAGE;
     ch[num].lvl = level;
-    ch[num ^ (1 << level)].lvl = level;
-    ch[num ^ (1 << level)].free = 1;
-    add_buddy(level, num ^ (1 << level)); 
+    if ((num ^ (1 << level)) < maxpages) {
+        ch[num ^ (1 << level)].lvl = level;
+        ch[num ^ (1 << level)].free = 1;
+        add_buddy(level, num ^ (1 << level)); 
+    }
     add_buddy(level, num);
     
 }
@@ -79,13 +117,12 @@ void prepare(int level) {
 
 uint64_t buddy_alloc(int level) {
     prepare(level);
-    ch[lists[level][--ptrs[level]]].free = 0;
-    return lists[level][ptrs[level]] * PAGE;
+    return delete_buddy(level);
 }
 
 void merge(size_t num) {
     int level = ch[num].lvl;
-    if (level + 1 == SIZE || ch[num ^ (1 << level)].free == 0 || ch[num ^ (1 << level)].lvl != level) {
+    if (level + 1 == SIZE || (num ^ (1 << level)) >= maxpages || ch[num ^ (1 << level)].usage == 0 || ch[num ^ (1 << level)].free == 0 || ch[num ^ (1 << level)].lvl != level) {
         add_buddy(level, num);
         return;
     }
