@@ -26,6 +26,7 @@ struct thread {
 static volatile pid_t current_thread = 1;
 extern void * start_thread;
 volatile struct thread threads[100];
+int cnt_lock[100];
 uint8_t size = 2;
 
 pid_t get_cur_thread() {
@@ -72,7 +73,6 @@ void run(pid_t id) {
 }
 
 void yield() {
-    __asm__ volatile ("cli");
     pid_t i = (current_thread + 1) % size;
     while (1) {
         if (i == 0 || threads[i].state != RUN) {
@@ -83,7 +83,6 @@ void yield() {
         break;
 
     }
-    __asm__ volatile ("sti");
 }
 
 void finish_thread() {
@@ -101,5 +100,10 @@ void free_thread(pid_t prev_thread) {
 }
 
 
+int get_cnt_lock() {
+    return cnt_lock[current_thread];
+}
 
-
+void update_cnt_lock(int val) {
+    cnt_lock[current_thread] += val;
+}
