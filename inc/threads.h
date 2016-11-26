@@ -18,6 +18,9 @@ void finish_thread();
 
 void free_thread(pid_t prev_thread);
 
+int get_cnt_lock();
+
+void update_cnt_lock(int val);
 
 
 pid_t switch_threads(void ** old_sp, void * new_sp);
