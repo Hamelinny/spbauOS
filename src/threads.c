@@ -23,12 +23,12 @@ struct thread {
     int state;
 };
 
-static volatile pid_t current_thread = 1;
+static volatile int current_thread = 1;
 extern void * start_thread;
 volatile struct thread threads[100];
 uint8_t size = 2;
 
-pid_t get_cur_thread() {
+int get_cur_thread() {
     return current_thread;
 }
 
@@ -37,7 +37,7 @@ void init_threads() {
     threads[0].state = CREATE;
 }
 
-pid_t create_thread(void (* fun)(void *), void * arg) {
+int create_thread(void (* fun)(void *), void * arg) {
     lock();
     volatile struct thread * new_thread = &threads[size];
     size++;
@@ -57,23 +57,23 @@ pid_t create_thread(void (* fun)(void *), void * arg) {
     init->arg = arg;
     new_thread->state = RUN;
     unlock();
-    return (pid_t)(new_thread - threads);
+    return (int)(new_thread - threads);
 }
 
-void run(pid_t id) {
+void run(int id) {
     if (current_thread == id) {
         return;
     }
     struct thread * thread = (struct thread *)threads + id;
-    pid_t prev = current_thread;
+    int prev = current_thread;
     current_thread = id;
     struct thread * pthread = (struct thread *)threads + prev;
-    pid_t pr = switch_threads(&pthread->stack_pointer, thread->stack_pointer);
+    int pr = switch_threads(&pthread->stack_pointer, thread->stack_pointer);
     free_thread(pr);
 }
 
 void yield() {
-    pid_t i = (current_thread + 1) % size;
+    int i = (current_thread + 1) % size;
     while (1) {
         if (i == 0 || threads[i].state != RUN) {
             i = (i + 1) % size;
@@ -91,7 +91,7 @@ void finish_thread() {
     yield();
 }
 
-void free_thread(pid_t prev_thread) {
+void free_thread(int prev_thread) {
     volatile struct thread * thread = (struct thread *)threads + prev_thread;
     if (thread->state == FINISH && prev_thread != current_thread) {
         buddy_free((uint64_t)thread->stack_start);
