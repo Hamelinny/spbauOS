@@ -2,6 +2,7 @@
 #include <memmap.h>
 #include <stdint.h>
 #include <memory.h>
+#include "lock.h"
 
 #define SIZE 25
 #define SHIFT 0xffff800000000000
@@ -116,8 +117,11 @@ void prepare(int level) {
 
 
 uint64_t buddy_alloc(int level) {
+    lock();
     prepare(level);
-    return delete_buddy(level) + SHIFT;
+    uint64_t res = delete_buddy(level) + SHIFT;
+    unlock();
+    return res;
 }
 
 void merge(size_t num) {
@@ -136,7 +140,13 @@ void merge(size_t num) {
 }
 
 void buddy_free(uint64_t addr) {
+    lock();
     size_t num = (addr - SHIFT) / PAGE;
+    if (ch[num].free == 1) {
+        unlock();
+        return;
+    }
     ch[num].free = 1;
     merge(num);
+    unlock();
 }
