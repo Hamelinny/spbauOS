@@ -2,7 +2,7 @@
 #include "threads.h"
 #include "buddy.h"
 #include "assert.h"
-
+#include "lock.h"
 
 #define CREATE 0
 #define RUN 1
@@ -39,8 +39,9 @@ void init_threads() {
 }
 
 pid_t create_thread(void (* fun)(void *), void * arg) {
-    __asm__ volatile ("cli");
-    volatile struct thread * new_thread = &threads[__sync_fetch_and_add(&size, 1)];
+    lock();
+    volatile struct thread * new_thread = &threads[size];
+    size++;
     new_thread->sz = 4;
     new_thread->stack_start = (void *)buddy_alloc(new_thread->sz);
     new_thread->stack_pointer = (uint8_t *)new_thread->stack_start + 4096 * (1 << (new_thread->sz)) - sizeof(struct thread_data);
@@ -56,7 +57,7 @@ pid_t create_thread(void (* fun)(void *), void * arg) {
     init->fun_addr = fun;
     init->arg = arg;
     new_thread->state = RUN;
-    __asm__ volatile ("sti");
+    unlock();
     return (pid_t)(new_thread - threads);
 }
 
