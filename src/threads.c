@@ -26,7 +26,6 @@ struct thread {
 static volatile pid_t current_thread = 1;
 extern void * start_thread;
 volatile struct thread threads[100];
-int cnt_lock[100];
 uint8_t size = 2;
 
 pid_t get_cur_thread() {
@@ -98,13 +97,4 @@ void free_thread(pid_t prev_thread) {
         buddy_free((uint64_t)thread->stack_start);
         thread->state = CREATE;
     }
-}
-
-
-int get_cnt_lock() {
-    return cnt_lock[current_thread];
-}
-
-void update_cnt_lock(int val) {
-    cnt_lock[current_thread] += val;
 }
