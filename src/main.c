@@ -17,8 +17,44 @@ static void qemu_gdb_hang(void)
 #include <memmap.h>
 #include <buddy.h>
 #include <slab.h>
+#include <threads.h>
+#include <lock.h>
 
 extern uint64_t handler[];
+
+struct spinlock spinlock1;
+struct spinlock spinlock2;
+
+int val = 0;
+
+void lock1(void * arg __attribute__((unused))) {
+    printf("lock1\n");
+    lock(&spinlock1);
+    printf("in spinlock1 %d\n", val);
+    yield();
+    lock(&spinlock2);
+    printf("in spinlock2 %d\n", val);
+    val = 1;
+    unlock(&spinlock2);
+    printf("out of spinlock2 %d\n", val);
+    unlock(&spinlock1);
+    printf("out of spinlock1 %d\n", val);
+
+}
+
+void lock2(void * arg __attribute__((unused))) {
+    printf("lock2\n");
+    lock(&spinlock1);
+    printf("in spinlock1 %d\n", val);
+    lock(&spinlock2);
+    printf("in spinlock2 %d\n", val);
+    val = 2;
+    unlock(&spinlock2);
+    printf("out of spinlock2 %d\n", val);
+    unlock(&spinlock1);
+    printf("out of spinlock1 %d\n", val);
+}
+    
 
 void main(void) {
     qemu_gdb_hang();
@@ -40,35 +76,12 @@ void main(void) {
 
     get_memmap();
     print_memmap();
-    /*uint64_t mem = buddy_alloc(0);
-    printf("%x\n", mem);
-    buddy_free(mem);
-    mem = buddy_alloc(1);
-    printf("%x\n", mem);
-    buddy_free(mem);
-    mem = buddy_alloc(2);
-    printf("%x\n", mem);
-    buddy_free(mem);
-    uint64_t mem1 = buddy_alloc(0);
-    printf("%x\n", mem1);
-    uint64_t mem2 = buddy_alloc(0);
-    printf("%x\n", mem2);
-    uint64_t mem3 = buddy_alloc(0);
-    printf("%x\n", mem3);
-    buddy_free(mem1);
-    buddy_free(mem2);
-    buddy_free(mem3);*/
 
-
-    struct slab_allocator * new_slab = init_slab(1024);
-    void * mem1 = alloc_slab(&new_slab);
-    void * mem2 = alloc_slab(&new_slab);
-    printf("%x %x\n", (uint64_t)mem1, (uint64_t)mem2);
-    free_slab(&new_slab, mem1);
-    free_slab(&new_slab, mem2);
-    mem1 = alloc_slab(&new_slab);
-    printf("%x\n", (uint64_t)mem1);
-
+    init_threads();
+    create_thread(lock1, 0);
+    create_thread(lock2, 0);
+    yield();
+    yield();
 
     while (1);
 }
