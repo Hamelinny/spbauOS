@@ -1,15 +1,18 @@
 #include "lock.h"
 #include "threads.h"
 #include "ints.h"
+#include <stdatomic.h>
+
+
+int cnt = 0;
 
 void lock() {
-    if (get_cnt_lock() == 0)
-        disable_ints();
-    update_cnt_lock(1);
+    disable_ints();
+    cnt++;
 }
 
 void unlock() {
-    update_cnt_lock(-1);
-    if (get_cnt_lock() == 0)
+    cnt--;
+    if (cnt == 0)
         enable_ints();
 }
